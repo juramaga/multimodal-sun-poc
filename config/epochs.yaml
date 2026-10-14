@@ -1,0 +1,32 @@
+# Epoch registry. An "epoch" = one EIS raster (the scarce, slowest modality),
+# around which AIA, HMI and XRT are matched. Grow the dataset by adding rows and
+# listing their ids in pipeline.yaml:active_epochs (or set it to "all").
+#
+# The anchor and its 8 siblings come from one Hinode flare-watch sequence:
+#   HOP 396 "Collaboration w/ Chandrayaan-2 XSM", target NOAA AR 12807,
+#   EIS study cam_flare_hot1_study (id 598): 25 steps x 4" (2" slit), 100"x120",
+#   ~4 min 50 s per raster, 10 s exposures, 9 windows (Fe XII 186/192, Ar XIV 194,
+#   Ca XV 182/201, Fe XVII 255, S XIII 257, Fe XXIII 263.8, Fe XIV 270.5).
+# Pointing ~(-21", -184") -> near disk centre: minimal foreshortening, the whole
+# FOV maps cleanly to heliographic coordinates, and the anchor file is shipped
+# inside eispac (eispac/data/test/) so it is always available.
+
+epochs:
+  - id: eis_20210306_064444
+    tags: [anchor, ar12807, hop396]
+    eis_file: eis_20210306_064444
+    note: "Anchor. Bundled in eispac. Mid-time 06:47:09 UT."
+
+  # ---- growth step 1: the rest of the same sequence (same target, same study)
+  - {id: eis_20210306_062512, tags: [seq, ar12807, hop396], eis_file: eis_20210306_062512}
+  - {id: eis_20210306_063005, tags: [seq, ar12807, hop396], eis_file: eis_20210306_063005}
+  - {id: eis_20210306_063458, tags: [seq, ar12807, hop396], eis_file: eis_20210306_063458}
+  - {id: eis_20210306_063951, tags: [seq, ar12807, hop396], eis_file: eis_20210306_063951}
+  - {id: eis_20210306_064937, tags: [seq, ar12807, hop396], eis_file: eis_20210306_064937}
+  - {id: eis_20210306_065430, tags: [seq, ar12807, hop396], eis_file: eis_20210306_065430}
+  - {id: eis_20210306_065923, tags: [seq, ar12807, hop396], eis_file: eis_20210306_065923}
+  - {id: eis_20210306_070416, tags: [seq, ar12807, hop396], eis_file: eis_20210306_070416}
+
+  # ---- growth step 2 (not active by default): large rasters later the same day
+  # (~150 MB each). Uncomment after the sequence above works end to end.
+  # - {id: eis_20210306_181244, tags: [large, ar12807], eis_file: eis_20210306_181244}

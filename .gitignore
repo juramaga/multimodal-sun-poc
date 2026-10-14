@@ -1,0 +1,8 @@
+data/
+data_test/
+*.part
+__pycache__/
+*.egg-info/
+.ipynb_checkpoints/
+.venv/
+.claude/settings.local.json

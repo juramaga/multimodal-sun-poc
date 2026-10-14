@@ -1,0 +1,62 @@
+# Multimodal Sun — proof-of-concept pipeline configuration (Phases 0-4)
+#
+# Everything that controls *how much* data is pulled lives in this file, so the
+# dataset can grow by editing config rather than code. See docs/06_scaling_up.md.
+
+data_dir: data                 # all downloads/products go below here (git-ignored)
+epochs_file: config/epochs.yaml
+active_epochs: [anchor]         # "anchor", "all", or a list of epoch ids from epochs.yaml
+
+# ---------------------------------------------------------------- EIS (anchor)
+eis:
+  archives:                     # Level-1 HDF5 (science-ready: calibrated count rates + radcal)
+    - https://eis.nrl.navy.mil/level1/hdf5/
+    - https://vsolar.mssl.ucl.ac.uk/eispac/hdf5/
+  use_bundled_if_available: true  # the anchor raster ships inside the eispac package
+  fit_templates: [fe_12_192_394.1c]   # Gaussian fits -> intensity, Doppler velocity, width
+  coalign_window: 192.394       # Fe XII; matched to AIA 193 for coalignment
+  integrate_all_windows: true   # window-summed intensity map for every spectral window
+
+# ---------------------------------------------------------------- SDO via JSOC
+jsoc:
+  email_env: JSOC_EMAIL         # export requests need an email registered at JSOC
+  aia_euv_series: aia.lev1_euv_12s
+  aia_context_channels: [94, 131, 171, 193, 211, 335, 304]
+  aia_pseudoraster_channel: 193 # one frame per EIS slit step
+  hmi_series: [hmi.M_45s]       # add hmi.Ic_45s / hmi.B_720s later if wanted
+  require_quality_zero: true    # drop frames with QUALITY != 0 at discovery time
+  context_margin_arcsec: 150    # cutout = EIS FOV + this margin on each side
+  pseudoraster_margin_arcsec: 40
+  server_side_lev15: false      # true -> ask JSOC for aia_scale_aialev1 (can fail silently)
+  max_wait_s: 900
+
+# ---------------------------------------------------------------- Hinode/XRT
+xrt:
+  level1_archive: https://umbra.nascom.nasa.gov/hinode/xrt/level1/  # SDAC, one dir per hour
+  preferred_filters: [Al_poly, Be_thin, Al_mesh, Ti_poly, Al_med, Be_med]
+  max_filters: 2                # keep the N best filters (by preference order)
+  max_header_requests: 400      # safety cap on range-requests per epoch
+  header_cache: data/cache/xrt_headers   # headers are cached; the archive is static
+  allow_synoptic_fallback: true # use the ~06/18 UT full-disk synoptic if no AR frame
+
+# ---------------------------------------------------------------- matching tolerances
+tolerance:
+  aia_step_s: 12                # nearest AIA 193 frame for each EIS slit step
+  aia_context_s: 12             # context set, around the raster mid-time
+  hmi_s: 45
+  xrt_ar_s: 300                 # co-pointed XRT frames, measured from the raster interval
+  xrt_synoptic_s: 1800
+  min_fov_coverage: 0.90        # fraction of the EIS FOV a frame must contain
+
+# ---------------------------------------------------------------- coalignment
+coalign:
+  eis_reference_channel: 193
+  xrt_reference_candidates: [335, 94, 211]   # best-correlating one is used
+  max_shift_arcsec: 40
+  min_correlation: 0.5          # below this, shift is reported but flagged
+
+# ---------------------------------------------------------------- common grid / tables
+grid:
+  pixel_arcsec: 2.0             # common helioprojective grid at the EIS mid-time
+  margin_arcsec: 0              # 0 -> grid = EIS FOV exactly
+  add_carrington: true          # lon/lat columns -> HATS-ready (Phase 5)

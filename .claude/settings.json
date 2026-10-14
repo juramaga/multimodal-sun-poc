@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python scripts/*)",
+      "Bash(python tools/*)",
+      "Bash(python tests/*)",
+      "Bash(python -m pytest*)",
+      "Bash(make *)",
+      "Bash(conda env *)",
+      "Bash(conda activate *)",
+      "Bash(jupyter nbconvert *)",
+      "Bash(du *)",
+      "Bash(df *)",
+      "Bash(ls *)",
+      "WebFetch(domain:docs.sunpy.org)",
+      "WebFetch(domain:eispac.readthedocs.io)",
+      "WebFetch(domain:aiapy.readthedocs.io)",
+      "WebFetch(domain:xrtpy.readthedocs.io)",
+      "WebFetch(domain:hats.readthedocs.io)",
+      "WebFetch(domain:docs.lsdb.io)",
+      "WebFetch(domain:jsoc.stanford.edu)",
+      "WebFetch(domain:www.lmsal.com)"
+    ],
+    "deny": [
+      "Bash(rm -rf data/raw*)"
+    ]
+  }
+}

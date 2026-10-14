@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mmsun"
+version = "0.1.0"
+description = "Multimodal Sun proof of concept: EIS-anchored, co-temporal SDO/AIA, SDO/HMI, Hinode/XRT and Hinode/EIS samples"
+requires-python = ">=3.10,<3.13"
+authors = [{ name = "Rafael Martinez-Galarza" }]
+license = { text = "BSD-3-Clause" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

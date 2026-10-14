@@ -1,0 +1,34 @@
+# conda env create -f environment.yml && conda activate mmsun
+#
+# Python is pinned to 3.12: on 3.13 the eispac dependency "pims" fails to build.
+# The solar packages come from PyPI (versions below were tested together on
+# 2026-10-14); the compiled scientific stack comes from conda-forge.
+name: mmsun
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - pip
+  - numpy>=2.0
+  - scipy>=1.13
+  - astropy>=7.0
+  - pandas>=2.2
+  - pyarrow>=16
+  - h5py>=3.10
+  - pyyaml
+  - matplotlib>=3.9
+  - requests
+  - jupyterlab
+  - ipykernel
+  - nbclient
+  - nbconvert
+  - pytest
+  - pip:
+      - "sunpy[map,net,image,visualization]>=6.0"   # tested 8.0.1
+      - aiapy>=0.10                                # tested 0.12.1
+      - eispac>=0.99                               # tested 0.99.4 (ships the anchor raster)
+      - xrtpy>=0.5                                 # tested 0.5.1 (XRT temperature responses)
+      - drms>=0.9                                  # tested 0.9.1 (JSOC keywords + im_patch exports)
+      - reproject>=0.13                            # tested 0.21.0
+      - lsdb>=0.11                                 # tested 0.11.0 (cross-match demo; Phase 5 HATS)
+      - -e .
