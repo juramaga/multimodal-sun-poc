@@ -52,10 +52,13 @@ def test_offline_pipeline():
     assert len(ctx) == 7 and 20 <= len(pr) <= 27, (len(ctx), len(pr))
     assert (pr.dt_s.astype(float).abs() <= 12).all()
     assert list(xr.channel) == ["Al_poly", "Be_thin"] and set(xr.role) == {"ar"}, xr[["channel", "role"]]
+    # in-raster ties go to the frame nearest the mid-time, not the longest exposure
+    assert list(xr.dt_mid_s.round()) == [-60, 75], xr[["channel", "dt_s", "dt_mid_s"]]
     assert (m.modality == "HMI").sum() == 1
     run("scripts/03_download.py", *c, "--dry-run")
 
-    run("scripts/04_prepare.py", *c, "--no-aiapy-tables")
+    out = run("scripts/04_prepare.py", *c, "--no-aiapy-tables")
+    assert "'XRT': 2" in out, "04_prepare must only use the XRT frames chosen by 02_match"
     run("scripts/05_coalign.py", *c)
 
     sh = json.loads((DATA / "aligned/eis_20210306_064444/shifts.json").read_text())

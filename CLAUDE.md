@@ -66,8 +66,8 @@ Total for the anchor: **~60 MB typical, ~120 MB worst case** (full-frame XRT), p
   mid-time, |Δt| ≤ 12 s, `QUALITY == 0`.
 * HMI: nearest `hmi.M_45s` to the mid-time, |Δt| ≤ 45 s, `QUALITY == 0`.
 * XRT: `EC_IMTY_ == normal`, FOV covers ≥ 90% of the EIS FOV, Δt to the raster
-  *interval* ≤ 300 s; best 2 filters in the order Al_poly, Be_thin, Al_mesh, Ti_poly…;
-  else synoptic full-disk within 1800 s.
+  *interval* ≤ 300 s (ties inside the raster → nearest the mid-time); best 2 filters in
+  the order Al_poly, Be_thin, Al_mesh, Ti_poly…; else synoptic full-disk within 1800 s.
 * Δt is stored for every product so tolerances can be tightened later without
   re-downloading. All tolerances live in `config/pipeline.yaml`.
 

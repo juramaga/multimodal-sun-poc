@@ -6,8 +6,11 @@
   * HMI: one frame nearest the raster mid-time
   * XRT: frames whose FOV contains >= min_fov_coverage of the EIS FOV, with dt
     measured to the raster *interval* (0 if taken during the raster); best N
-    filters by preference; full-disk synoptic as a fallback.
-dt is always stored, so later users can tighten the tolerance without re-running.
+    filters by preference; ties (e.g. several frames inside the raster) go to the
+    frame nearest the raster mid-time; full-disk synoptic as a fallback.
+dt is always stored, so later users can tighten the tolerance without re-running:
+dt_s is relative to each product's own reference (step, mid-time or interval),
+dt_mid_s is always t_obs - raster mid-time.
 """
 
 from __future__ import annotations
@@ -17,7 +20,7 @@ import pandas as pd
 
 from .xrt import coverage
 
-MATCH_COLUMNS = ["epoch", "modality", "role", "channel", "t_obs", "t_rec", "dt_s", "steps",
+MATCH_COLUMNS = ["epoch", "modality", "role", "channel", "t_obs", "t_rec", "dt_s", "dt_mid_s", "steps",
                  "ds_or_url", "coverage", "est_bytes", "series"]
 
 
@@ -65,8 +68,13 @@ def dt_to_interval(t: pd.Series, t0: pd.Timestamp, t1: pd.Timestamp) -> pd.Serie
     return np.where(t < t0, -before, after)
 
 
-def select_xrt(hdr: pd.DataFrame, box, t0, t1, cfg: dict) -> tuple[pd.DataFrame, str]:
-    """Return (chosen frames, mode) where mode is 'ar', 'synoptic' or 'none'."""
+def select_xrt(hdr: pd.DataFrame, box, t0, t1, cfg: dict, tmid=None) -> tuple[pd.DataFrame, str]:
+    """Return (chosen frames, mode) where mode is 'ar', 'synoptic' or 'none'.
+
+    Per filter: smallest dt to the raster interval, then smallest |dt| to the mid-time
+    (every frame inside the raster has interval dt = 0), then longest exposure.
+    """
+    tmid = t0 + (t1 - t0) / 2 if tmid is None else tmid
     if hdr is None or hdr.empty or "t_obs" not in hdr:
         return pd.DataFrame(), "none"
     tol = cfg["tolerance"]
@@ -77,6 +85,7 @@ def select_xrt(hdr: pd.DataFrame, box, t0, t1, cfg: dict) -> tuple[pd.DataFrame,
         return pd.DataFrame(), "none"
     h["coverage"] = [coverage(r, box) for r in h.itertuples()]
     h["dt_s"] = dt_to_interval(h.t_obs, t0, t1)
+    h["dt_mid_s"] = (h.t_obs - tmid).dt.total_seconds()
     h["rank"] = [pref.index(f) if f in pref else len(pref) for f in h["filter"]]
     h = h[h.coverage >= tol["min_fov_coverage"]]
 
@@ -84,8 +93,8 @@ def select_xrt(hdr: pd.DataFrame, box, t0, t1, cfg: dict) -> tuple[pd.DataFrame,
         sub = sub[np.abs(sub.dt_s) <= tol_s]
         if sub.empty:
             return sub
-        sub = sub.assign(adt=np.abs(sub.dt_s)).sort_values(["rank", "adt", "exptime"],
-                                                           ascending=[True, True, False])
+        sub = sub.assign(adt=np.abs(sub.dt_s), adt_mid=np.abs(sub.dt_mid_s))
+        sub = sub.sort_values(["rank", "adt", "adt_mid", "exptime"], ascending=[True, True, True, False])
         per_filter = sub.groupby("filter", sort=False).head(1)
         return per_filter.sort_values("rank").head(cfg["xrt"]["max_filters"])
 

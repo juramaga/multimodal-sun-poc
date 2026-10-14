@@ -26,7 +26,10 @@ data/
 
 ## `match.parquet`
 `epoch, modality, role (anchor|pseudoraster|context|ar|synoptic), channel, t_obs, t_rec,
-dt_s, steps, ds_or_url, coverage, est_bytes, series`
+dt_s, dt_mid_s, steps, ds_or_url, coverage, est_bytes, series`
+
+`dt_s` is relative to each product's own reference (EIS step for the pseudo-raster,
+mid-time for context/HMI, raster interval for XRT); `dt_mid_s` = `t_obs` − raster mid-time.
 
 ## `pixels.parquet` — the HATS-ready "object" table
 | column | meaning |

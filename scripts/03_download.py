@@ -100,7 +100,8 @@ def main():
             for r in m[m.modality == "XRT"].itertuples():
                 f = download(r.ds_or_url, P.raw("xrt") / Path(r.ds_or_url).name)
                 log.append(dict(modality="XRT", channel=r.channel, path=str(f)))
-                print(f"XRT  {f.name}  ({r.channel}, dt={r.dt_s:+.0f}s)")
+                dt_mid = getattr(r, "dt_mid_s", float("nan"))   # absent in match.parquet from older runs
+                print(f"XRT  {f.name}  ({r.channel}, dt={r.dt_s:+.0f}s, mid {dt_mid:+.0f}s)")
 
         size = sum(f.stat().st_size for mod in ("eis", "aia", "hmi", "xrt")
                    for f in P.raw(mod).rglob("*") if f.is_file())

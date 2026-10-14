@@ -97,16 +97,17 @@ def main():
             for c in ("exptime", "fovx", "fovy", "xcen", "ycen"):
                 hdr[c] = pd.to_numeric(hdr[c], errors="coerce")
             hdr["error"] = hdr["error"].replace("nan", "")
-        chosen, mode = match.select_xrt(hdr, box, t0, t1, cfg)
+        chosen, mode = match.select_xrt(hdr, box, t0, t1, cfg, tmid)
         for r in chosen.itertuples():
             rows.append(dict(epoch=ep["id"], modality="XRT", role=mode, channel=r.filter, t_obs=r.t_obs,
                              t_rec="", dt_s=float(r.dt_s), steps="", ds_or_url=r.url,
                              coverage=float(r.coverage), est_bytes=int(r.bytes_est), series="xrt_l1_sdac"))
-        verdict["XRT"] = (f"ok ({mode}): " + ", ".join(f"{r.filter} dt={r.dt_s:+.0f}s"
+        verdict["XRT"] = (f"ok ({mode}): " + ", ".join(f"{r.filter} dt={r.dt_s:+.0f}s (mid {r.dt_mid_s:+.0f}s)"
                                                          for r in chosen.itertuples())) if mode != "none" \
             else "MISSING: no frame covers the EIS FOV within tolerance"
 
         m = pd.DataFrame(rows, columns=match.MATCH_COLUMNS)
+        m["dt_mid_s"] = (pd.to_datetime(m.t_obs) - tmid).dt.total_seconds()
         write_parquet(m, P.manifest / "match.parquet")
         missing = [k for k, v in verdict.items() if v.startswith("MISSING")]
         any_missing |= bool(missing)

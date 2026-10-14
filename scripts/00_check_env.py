@@ -20,7 +20,8 @@ PKGS = ["numpy", "scipy", "astropy", "sunpy", "aiapy", "eispac", "xrtpy", "drms"
         "h5py", "pandas", "pyarrow", "yaml", "matplotlib", "lsdb", "hats"]
 
 ENDPOINTS = {
-    "JSOC (AIA/HMI)": "http://jsoc.stanford.edu/cgi-bin/ajax/show_info?ds=hmi.M_45s&key=T_REC&n=1",
+    # one record by its T_REC: an open-ended record set makes JSOC scan the series (>15 s, false alarm)
+    "JSOC (AIA/HMI)": "http://jsoc.stanford.edu/cgi-bin/ajax/show_info?ds=hmi.M_45s[2021.03.06_06:48:00_TAI]&key=T_REC",
     "NRL EIS archive": "https://eis.nrl.navy.mil/level1/hdf5/2021/03/06/",
     "MSSL EIS mirror": "https://vsolar.mssl.ucl.ac.uk/eispac/hdf5/2021/03/06/",
     "SDAC XRT Level-1": "https://umbra.nascom.nasa.gov/hinode/xrt/level1/2021/03/06/H0600/",

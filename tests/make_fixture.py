@@ -150,6 +150,12 @@ def main(data_dir: Path):
         h = header(cx, cy, n, n, 1.0, tx, telescop="HINODE", instrume="XRT", ec_fw1_=filt,  # both live in filter wheel 1
                    ec_fw2_="Open", ec_imty_="normal", exptime=1.0)
         save(img, h, raw / "xrt" / EPOCH / f"L1_XRT{tx:%Y%m%d_%H%M%S}.0.fits")
+    # decoy: an in-raster Be_thin frame that 02_match must NOT choose (farther from the
+    # mid-time, though longer exposure) and that 04_prepare must therefore ignore
+    tx = tmid + pd.Timedelta(seconds=140)
+    save(rng.normal(0, 2, (384, 384)), header(cx, cy, 384, 384, 1.0, tx, telescop="HINODE", instrume="XRT",
+                                              ec_fw1_="Be_thin", ec_fw2_="Open", ec_imty_="normal", exptime=4.0),
+         raw / "xrt" / EPOCH / f"L1_XRT{tx:%Y%m%d_%H%M%S}.0.fits")
     write_candidates(data_dir, info, b, tmid)
     print(f"fixture written to {data_dir}")
 
@@ -181,12 +187,13 @@ def write_candidates(data_dir: Path, info, box, tmid):
     for k, (filt, dt, fov, imtype) in enumerate([
         ("Al_poly", -60, 384, "normal"), ("Be_thin", 75, 384, "normal"), ("Al_poly", 20, 384, "dark"),
         ("Ti_poly", 400, 384, "normal"), ("Gband", 10, 384, "normal"), ("Al_mesh", -1500, 2048, "normal"),
-        ("Al_poly", 30, 128, "normal")]):            # last one is too small to cover the EIS FOV
+        ("Al_poly", 30, 64, "normal"),               # too small to cover the EIS FOV
+        ("Be_thin", 140, 384, "normal")]):           # in-raster tie with the +75 s Be_thin: must lose
         tt = tmid + pd.Timedelta(seconds=dt)
         n = fov
-        hdr.append(dict(url=f"https://example.invalid/L1_XRT{tt:%Y%m%d_%H%M%S}.{k}.fits",
-                        file=f"L1_XRT{tt:%Y%m%d_%H%M%S}.{k}.fits", t_obs=tt, filter=filt, imtype=imtype,
-                        exptime=1.0, naxis1=n, naxis2=n, cdelt1=1.0, cdelt2=1.0, xcen=cx, ycen=cy,
+        hdr.append(dict(url=f"https://example.invalid/L1_XRT{tt:%Y%m%d_%H%M%S}.0.fits",
+                        file=f"L1_XRT{tt:%Y%m%d_%H%M%S}.0.fits", t_obs=tt, filter=filt, imtype=imtype,
+                        exptime=4.0 if dt == 140 else 1.0, naxis1=n, naxis2=n, cdelt1=1.0, cdelt2=1.0, xcen=cx, ycen=cy,
                         fovx=float(n), fovy=float(n), chip_sum=1, bytes_est=n * n * 4, error=""))
     pd.DataFrame(hdr).to_parquet(man / "cand_xrt.parquet", index=False)
 

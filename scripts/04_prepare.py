@@ -57,7 +57,19 @@ def main():
             recs.append(dict(r, modality="HMI", role="context"))
             print(f"HMI  {Path(r['path']).name}  QUALITY={r['quality']}")
 
-        for f in sorted(P.raw("xrt").glob("*.fits")):
+        # only the frames chosen by 02_match: raw/ keeps every frame ever downloaded
+        match_file = P.manifest / "match.parquet"
+        if match_file.exists():
+            m = pd.read_parquet(match_file)
+            names = [Path(u).name for u in m.loc[m.modality == "XRT", "ds_or_url"]]
+            xrt_files = [P.raw("xrt") / n for n in names if (P.raw("xrt") / n).exists()]
+            for n in names:
+                if not (P.raw("xrt") / n).exists():
+                    print(f"XRT  {n}  MISSING in raw/ (run 03_download.py)")
+        else:
+            print("XRT  no match.parquet: preparing every file in raw/xrt")
+            xrt_files = sorted(P.raw("xrt").glob("*.fits"))
+        for f in xrt_files:
             r = xrt.prepare(f, P.prep("xrt"))
             recs.append(dict(r, modality="XRT"))
             print(f"XRT  {Path(r['path']).name}  saturated px: {r['n_saturated']}")
