@@ -30,5 +30,6 @@ dependencies:
       - xrtpy>=0.5                                 # tested 0.5.1 (XRT temperature responses)
       - drms>=0.9                                  # tested 0.9.1 (JSOC keywords + im_patch exports)
       - reproject>=0.13                            # tested 0.21.0
-      - lsdb>=0.11                                 # tested 0.11.0 (cross-match demo; Phase 5 HATS)
+      - lsdb==0.11.0        # tested local HATS + streaming APIs
+      - hats==0.11.0        # matching collection/margin layout
       - -e .

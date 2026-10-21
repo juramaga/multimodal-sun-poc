@@ -16,7 +16,8 @@ eispac>=0.99          # 0.99.4
 xrtpy>=0.5            # 0.5.1
 drms>=0.9             # 0.9.1
 reproject>=0.13       # 0.21.0
-lsdb>=0.11            # 0.11.0
+lsdb==0.11.0          # tested persistence, crossmatch and CatalogStream APIs
+hats==0.11.0          # matching collection/margin layout
 jupyterlab
 ipykernel
 nbclient
