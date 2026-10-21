@@ -60,3 +60,11 @@ grid:
   pixel_arcsec: 2.0             # common helioprojective grid at the EIS mid-time
   margin_arcsec: 0              # 0 -> grid = EIS FOV exactly
   add_carrington: true          # lon/lat columns -> HATS-ready (Phase 5)
+
+# --------------------------------------------- two-modality HATS prototype
+xmatch:
+  patch_size: 16                # native XRT pixels, inline image payload
+  patch_stride: 8               # overlapping patches, not independent samples
+  radius_heliographic_deg: 0.5  # solar-sphere angle, NOT an angle on the sky
+  partition_rows: 256           # best-effort target, not a memory cap
+  highest_order: 5              # cells wider than the crossmatch margin

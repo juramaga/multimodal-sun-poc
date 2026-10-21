@@ -4,7 +4,7 @@ PY      ?= python
 EPOCHS  ?= anchor
 E        = --epochs $(EPOCHS)
 
-.PHONY: help env check test notebook-test discover match download-dry download prepare coalign notebook all du clean-products clean-all
+.PHONY: help env check test notebook-test discover match download-dry download prepare coalign notebook hats all du clean-products clean-all
 
 help:
 	@echo "env            create the conda env 'mmsun' (one-off)"
@@ -18,6 +18,7 @@ help:
 	@echo "coalign        Phase 4: coalign, common grid, tables       -> data/aligned/<epoch>/"
 	@echo "notebook       execute notebooks/01_summary.ipynb in place"
 	@echo "notebook-test  execute the notebook on the offline fixture (synthetic SDO/XRT)"
+	@echo "hats           export prepared EIS spectra + XRT patches as HATS collections"
 	@echo "all            check -> discover -> match -> download -> prepare -> coalign -> notebook"
 	@echo "du             disk estimate + measured usage"
 
@@ -28,7 +29,7 @@ check:
 	$(PY) scripts/00_check_env.py $(E)
 
 test:
-	$(PY) -m pytest -q -s tests/test_offline_pipeline.py
+	$(PY) -m pytest -q -s tests/test_offline_pipeline.py tests/test_xmatch.py
 
 discover:
 	$(PY) scripts/01_discover.py $(E)
@@ -54,6 +55,9 @@ notebook:
 notebook-test:    ## run the notebook on the offline fixture (after `make test`); output in data_test/
 	MMSUN_CONFIG=$(CURDIR)/data_test/pipeline_test.yaml jupyter nbconvert --to notebook --execute \
 	  notebooks/01_summary.ipynb --output-dir data_test --output 01_summary_fixture.ipynb
+
+hats:
+	$(PY) scripts/build_hats.py $(E)
 
 all: check discover match download prepare coalign notebook du
 

@@ -18,7 +18,11 @@
 * JSOC exports should be batched (one export per T_REC range and channel set per day).
 * `native.parquet` should be partitioned by epoch/day; the common grid stays per epoch.
 
-## Phase 5 sketch (not implemented)
+## General Phase 5 sketch (not implemented)
+
+A narrower **EIS spectra + XRT patches** HATS writer and streaming crossmatch is
+now implemented; see [the two-modality prototype](08_eis_xrt_prototype.md).
+It does not replace the general pixel/native-table catalog design below.
 
 Both tables already carry `lon_carr`/`lat_carr`, the natural "sky" for the Sun:
 
